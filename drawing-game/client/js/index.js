@@ -1,4 +1,4 @@
-const socket = io();
+const socket = io("https://web3task-drawing-game.onrender.com");
 const nameInput = document.querySelector('#player-name');
 const roomInput = document.querySelector('#room-code');
 const errorMessage = document.querySelector('#home-error');
