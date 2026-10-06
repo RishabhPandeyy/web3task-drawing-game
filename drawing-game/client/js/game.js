@@ -1,4 +1,4 @@
-const socket = io();
+const socket = io("https://web3task-drawing-game.onrender.com");
 const roomCode = new URLSearchParams(window.location.search).get('room')?.toUpperCase();
 const sessionKey = `quickdraw:${roomCode}`;
 const playerSession = JSON.parse(sessionStorage.getItem(sessionKey) || 'null');
