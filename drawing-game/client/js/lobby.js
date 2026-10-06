@@ -6,6 +6,8 @@ const roomCodeDisplay = document.querySelector('#room-code-display');
 const footerCode = document.querySelector('#footer-code');
 const playerList = document.querySelector('#player-list');
 const playerCount = document.querySelector('#player-count');
+const capacityLabel = document.querySelector('#capacity-label');
+const settingsSummary = document.querySelector('#settings-summary');
 const startButton = document.querySelector('#start-game');
 const waitingMessage = document.querySelector('#waiting-message');
 const errorMessage = document.querySelector('#lobby-error');
@@ -21,7 +23,23 @@ function addInitials(name) { return name.split(/\s+/).slice(0, 2).map((word) => 
 function renderPlayers(room) {
   currentRoom = room;
   const players = room.players;
+  const isHost = room.hostId === playerSession.playerId;
   playerCount.textContent = players.length;
+  capacityLabel.textContent = `UP TO ${room.settings?.maxPlayers || 8}`;
+  settingsSummary.replaceChildren(
+    ...[
+      `${room.settings?.rounds || 3} rounds`,
+      `${room.settings?.drawTime || 60}s draw`,
+      `${room.settings?.wordCount || 3} words`,
+      `${room.settings?.hintCount ?? 2} hints`,
+      room.settings?.isPublic ? 'public' : 'private',
+      room.settings?.wordMode || 'normal'
+    ].map((label) => {
+      const item = document.createElement('span');
+      item.textContent = label.toUpperCase();
+      return item;
+    })
+  );
   playerList.replaceChildren();
   players.forEach((player, index) => {
     const item = document.createElement('li');
@@ -36,9 +54,18 @@ function renderPlayers(room) {
     tag.className = player.isHost ? 'host-tag' : 'player-presence';
     tag.textContent = player.isHost ? 'HOST' : player.connected ? 'READY' : 'RECONNECTING';
     item.append(avatar, name, tag);
+    if (isHost && !player.isHost && room.gameStatus === 'lobby') {
+      const kickButton = document.createElement('button');
+      kickButton.className = 'kick-button';
+      kickButton.type = 'button';
+      kickButton.textContent = 'KICK';
+      kickButton.addEventListener('click', () => socket.emit('kick_player', { playerId: player.id }, (result) => {
+        if (!result?.ok) setError(result?.error || 'Could not remove that player.');
+      }));
+      item.append(kickButton);
+    }
     playerList.append(item);
   });
-  const isHost = room.hostId === playerSession.playerId;
   startButton.disabled = !isHost || players.filter((player) => player.connected).length < 2 || room.gameStatus !== 'lobby';
   startButton.querySelector('span:first-child').textContent = isHost ? 'Start the game' : 'Waiting for host';
   waitingMessage.textContent = players.filter((player) => player.connected).length < 2 ? 'Waiting for at least one more player...' : isHost ? 'Everyone in? Deal the first word.' : 'The host will start the game shortly.';
@@ -56,6 +83,10 @@ socket.on('connect_error', () => setError('Connection lost. Retrying…'));
 socket.on('room_updated', renderPlayers);
 socket.on('game_started', () => window.location.assign(`/game.html?room=${roomCode}`));
 socket.on('player_joined', ({ playerName }) => { waitingMessage.textContent = `${playerName} just joined. Looking good.`; });
+socket.on('kicked', () => {
+  sessionStorage.removeItem(sessionKey);
+  window.location.replace('/');
+});
 
 document.querySelector('#copy-code').addEventListener('click', async () => {
   try {

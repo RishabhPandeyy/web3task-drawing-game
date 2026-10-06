@@ -120,12 +120,15 @@ function receiveStrokePoint(payload, starts, ends) {
     drawSegment(currentStroke, currentStroke.points[0], currentStroke.points[0]);
     return;
   }
+  if (ends) {
+    currentStroke = null;
+    return;
+  }
   if (payload && currentStroke) {
     const point = { x: payload.x, y: payload.y };
     drawSegment(currentStroke, currentStroke.points[currentStroke.points.length - 1], point);
     currentStroke.points.push(point);
   }
-  if (ends) currentStroke = null;
 }
 
 function renderPlayers(players) {
@@ -157,14 +160,15 @@ function renderState(state) {
   document.querySelector('#round-number').textContent = Math.max(1, state.currentRound);
   document.querySelector('#round-total').textContent = state.totalRounds;
   const drawer = state.players.find((player) => player.id === state.currentDrawerId);
+  const self = state.players.find((player) => player.id === playerSession.playerId);
   document.querySelector('#drawer-label').textContent = drawer ? `${drawer.name} is drawing` : 'Waiting for the artist';
   document.querySelector('#word-display').textContent = state.isDrawer && state.word ? state.word : state.hint || (state.gameStatus === 'lobby' ? 'Waiting for players…' : 'Waiting for the drawer…');
   document.querySelector('#canvas-status').textContent = state.isDrawer ? 'Your canvas, your rules' : 'Watch closely';
   canDraw = Boolean(state.isDrawer && state.word && state.gameStatus === 'playing');
   document.querySelector('#drawing-tools').classList.toggle('tools-disabled', !canDraw);
-  chatInput.disabled = Boolean(state.isDrawer || state.gameStatus !== 'playing' || state.players.find((player) => player.id === playerSession.playerId)?.guessedCorrectly);
-  chatInput.placeholder = state.isDrawer ? 'You are drawing...' : state.gameStatus === 'playing' ? 'Type your guess...' : 'Chat opens when the game starts';
-  chatHint.textContent = state.isDrawer ? 'Sketch the word without spelling it out' : 'Enter a guess to score points';
+  chatInput.disabled = Boolean(state.isDrawer || state.gameStatus !== 'playing');
+  chatInput.placeholder = state.isDrawer ? 'You are drawing...' : self?.guessedCorrectly ? 'Send table talk...' : state.gameStatus === 'playing' ? 'Type your guess...' : 'Chat opens when the game starts';
+  chatHint.textContent = state.isDrawer ? 'Sketch the word without spelling it out' : self?.guessedCorrectly ? 'You found it. Chat is open.' : 'Enter a guess to score points';
   renderPlayers(state.players);
   if (state.wordChoices?.length) showWordChoices(state.wordChoices);
   else choiceOverlay.hidden = true;
@@ -183,7 +187,7 @@ function showWordChoices(choices) {
     wordChoices.append(button);
   });
   choiceOverlay.hidden = false;
-  document.querySelector('#canvas-status').textContent = 'Choose one of three words';
+  document.querySelector('#canvas-status').textContent = `Choose one of ${choices.length} words`;
 }
 
 function addMessage(message, type = 'message') {
@@ -220,6 +224,10 @@ socket.on('connect', () => {
   });
 });
 socket.on('disconnect', () => { document.querySelector('#connection-status').innerHTML = '<span></span> RECONNECTING'; showToast('Connection interrupted. Reconnecting…'); });
+socket.on('kicked', () => {
+  sessionStorage.removeItem(sessionKey);
+  window.location.replace('/');
+});
 socket.on('room_updated', (room) => {
   if (gameState?.gameStatus === 'ended' && room.gameStatus === 'lobby') {
     window.location.assign(`/lobby.html?room=${roomCode}`);
@@ -293,7 +301,8 @@ chatForm.addEventListener('submit', (event) => {
   event.preventDefault();
   const text = chatInput.value.trim();
   if (!text || chatInput.disabled) return;
-  socket.emit('guess', { text });
+  const self = gameState?.players?.find((player) => player.id === playerSession.playerId);
+  socket.emit(self?.guessedCorrectly ? 'chat_message' : 'guess', { text });
   chatInput.value = '';
 });
 

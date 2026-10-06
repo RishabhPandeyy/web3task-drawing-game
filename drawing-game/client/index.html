@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/css/style.css">
-  <script src="https://web3task-drawing-game.onrender.com/socket.io/socket.io.js" defer></script>
+  <script src="/socket.io/socket.io.js" defer></script>
   <script src="/js/index.js" defer></script>
 </head>
 <body class="home-page">
@@ -29,12 +29,28 @@
       <form id="create-form" class="entry-form">
         <label for="player-name">YOUR NAME</label>
         <input id="player-name" name="name" maxlength="18" autocomplete="nickname" placeholder="What should we call you?" required>
-        <button class="button button-primary button-full" type="submit"><span>Create a room</span><span aria-hidden="true">↗</span></button>
+        <div id="private-options" class="private-options" hidden>
+          <div class="settings-grid" aria-label="Private room settings">
+            <label>PLAYERS<input id="max-players" type="number" min="2" max="20" value="8"></label>
+            <label>ROUNDS<input id="rounds" type="number" min="2" max="10" value="3"></label>
+            <label>DRAW TIME<input id="draw-time" type="number" min="15" max="240" value="60"></label>
+            <label>WORDS<input id="word-count" type="number" min="1" max="5" value="3"></label>
+            <label>HINTS<input id="hint-count" type="number" min="0" max="5" value="2"></label>
+            <label>MODE<select id="word-mode"><option value="normal">Normal</option><option value="hidden">Hidden</option><option value="combination">Combination</option></select></label>
+          </div>
+          <label for="custom-words">CUSTOM WORDS</label>
+          <textarea id="custom-words" rows="2" placeholder="Comma or line separated words"></textarea>
+        </div>
+        <div class="room-mode-actions">
+          <button id="create-room-button" class="button button-primary button-full" type="submit"><span>Public room</span><span aria-hidden="true">↗</span></button>
+          <button id="private-room-toggle" class="button button-secondary button-full" type="button" aria-expanded="false" aria-controls="private-options"><span>Private room</span><span aria-hidden="true">↓</span></button>
+        </div>
       </form>
       <div class="form-divider"><span></span><small>OR JOIN YOUR FRIENDS</small><span></span></div>
       <form id="join-form" class="join-form">
         <label for="room-code">ROOM CODE</label>
-        <div class="join-row"><input id="room-code" name="roomCode" maxlength="5" autocomplete="off" placeholder="e.g. 4KJ8M" aria-label="Room code" required><button class="button button-secondary" type="submit">Join room <span aria-hidden="true">→</span></button></div>
+        <div class="join-row"><input id="room-code" name="roomCode" maxlength="5" autocomplete="off" placeholder="e.g. 4KJ8M" aria-label="Room code"><button class="button button-secondary" type="submit">Join room <span aria-hidden="true">→</span></button></div>
+        <button id="join-public" class="button button-secondary button-full" type="button">Public room <span aria-hidden="true">→</span></button>
       </form>
       <p id="home-error" class="form-error" role="alert" aria-live="polite"></p>
       <div class="panel-foot"><span class="lock-icon" aria-hidden="true">◈</span> Private rooms. No account needed.</div>

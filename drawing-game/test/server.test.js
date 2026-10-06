@@ -1,6 +1,6 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { createRoom, joinRoom, getPublicRoom, MAX_PLAYERS } = require('../server/roomManager');
+const { createRoom, joinRoom, getPublicRoom, DEFAULT_SETTINGS, MAX_PLAYERS, normalizeSettings } = require('../server/roomManager');
 const { getWordChoices, normalizeWord } = require('../server/wordManager');
 const { scoreCorrectGuess, scoreDrawer } = require('../server/scoring');
 const { sanitizeDrawing } = require('../server/gameManager');
@@ -20,8 +20,20 @@ test('validates names, room codes, duplicate names, and capacity', () => {
   assert.throws(() => joinRoom(rooms, 'NOPE', 'socket-x', 'Lin', 'player-x'), /Room not found/);
   assert.throws(() => joinRoom(rooms, room.code, 'socket-x', '  ', 'player-x'), /player name/);
   assert.throws(() => joinRoom(rooms, room.code, 'socket-x', 'ada', 'player-x'), /already in this room/);
-  for (let index = 2; index <= MAX_PLAYERS; index += 1) joinRoom(rooms, room.code, `socket-${index}`, `Player ${index}`, `player-${index}`);
+  for (let index = 2; index <= DEFAULT_SETTINGS.maxPlayers; index += 1) joinRoom(rooms, room.code, `socket-${index}`, `Player ${index}`, `player-${index}`);
   assert.throws(() => joinRoom(rooms, room.code, 'socket-full', 'Extra', 'player-extra'), /full/);
+});
+
+test('normalizes host-configurable room settings', () => {
+  const settings = normalizeSettings({ maxPlayers: 99, rounds: 1, drawTime: 999, wordCount: 0, hintCount: 99, isPublic: true, wordMode: 'hidden', customWords: 'Alpha, Beta\nGamma' });
+  assert.equal(settings.maxPlayers, MAX_PLAYERS);
+  assert.equal(settings.rounds, 2);
+  assert.equal(settings.drawTime, 240);
+  assert.equal(settings.wordCount, 1);
+  assert.equal(settings.hintCount, 5);
+  assert.equal(settings.isPublic, true);
+  assert.equal(settings.wordMode, 'hidden');
+  assert.deepEqual(settings.customWords, ['Alpha', 'Beta', 'Gamma']);
 });
 
 test('public room snapshots never include selected words or word choices', () => {

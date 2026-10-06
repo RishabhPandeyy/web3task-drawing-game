@@ -5,8 +5,8 @@ const WORDS = {
   Nature: ['Rainbow', 'Volcano', 'Cactus', 'Ocean', 'Lightning', 'Mountain', 'Snowflake', 'Desert']
 };
 
-function getWordChoices(count = 3) {
-  const pool = Object.values(WORDS).flat();
+function getWordChoices(count = 3, customWords = []) {
+  const pool = [...Object.values(WORDS).flat(), ...customWords].filter(Boolean);
   const choices = [];
   while (choices.length < Math.min(count, pool.length)) {
     const word = pool[Math.floor(Math.random() * pool.length)];

@@ -1,15 +1,15 @@
 # Real-Time Multiplayer Drawing Game
 
-Quickdraw is a browser-based drawing and guessing party game. Create a private room, invite a group with its short code, and see whether your sketches make any sense to anyone else.
+Quickdraw is a browser-based drawing and guessing party game. Create a private or public room, invite a group with its short code, and see whether your sketches make any sense to anyone else.
 
 ## Features
 
-- Private room codes, host controls, player limits, and live lobby updates.
-- Three rounds with rotating drawers, private word choices, and a synchronized 60-second timer.
+- Private room codes, public room matchmaking, host controls, player limits, and live lobby updates.
+- Host-configurable rounds, player limits, draw time, word choices, hint count, word mode, and custom words.
 - Responsive Canvas drawing with brush, color picker, brush size, eraser, clear, and undo.
 - Live stroke events instead of repeated canvas image uploads.
-- Server-checked guesses, speed-based scoring, drawer bonuses, and final standings.
-- Reconnection grace period and automatic host handoff after disconnect.
+- Timed hint reveals, server-checked guesses, speed-based scoring, drawer bonuses, and final standings.
+- Lobby kick controls, post-guess chat, reconnection grace period, and automatic host handoff after disconnect.
 - Mobile-friendly layout with pointer input for mouse, pen, or touch.
 
 ## Tech Stack
@@ -66,7 +66,7 @@ npm run check
 
 ## How the Game Works
 
-The host starts a three-round game with at least two connected players. Each player draws once per round. At the start of a turn the server chooses three words and sends them only to the current drawer. The drawer's chosen word stays on the server; other players receive a masked hint. Drawing and guesses are accepted only from players allowed to perform those actions.
+The host configures and starts a game with at least two connected players. Each player draws once per round. At the start of a turn the server chooses the configured number of word options and sends them only to the current drawer. The drawer's chosen word stays on the server; other players receive blanks, then timed hint reveals unless hidden mode disables hints. Drawing and guesses are accepted only from players allowed to perform those actions.
 
 The server owns the round deadline and awards 100 base points plus up to 100 speed points for a correct guess. The drawer receives 50 points for each correct guess. Correct guesses score only once per player per turn. After the timer expires or all connected guessers solve the word, the answer is revealed and the next turn starts.
 
@@ -76,11 +76,15 @@ Room/game state is held in memory, so active games end if the server restarts. T
 
 Clients join a Socket.IO room named by the room code. The server broadcasts sanitized room/player state and drawing point events to that room. Private drawer data is emitted directly to that player's socket. Stroke coordinates are normalized to the canvas dimensions so each client can render them at its own size; the server clamps coordinates, color, and brush width and checks the active drawer before relaying them.
 
-Main event groups include `create_room`, `join_room`, `resume_room`, `room_updated`, `start_game`, `choose_word`, `game_state`, `round_started`, `timer_update`, `draw_start`, `draw_move`, `draw_end`, `clear_canvas`, `undo_drawing`, `guess`, `correct_guess`, `round_ended`, and `game_over`.
+Main event groups include `create_room`, `join_room`, `join_public_room`, `resume_room`, `room_updated`, `kick_player`, `start_game`, `choose_word`, `game_state`, `round_started`, `timer_update`, `draw_start`, `draw_move`, `draw_end`, `clear_canvas`, `undo_drawing`, `guess`, `chat_message`, `correct_guess`, `round_ended`, and `game_over`.
 
 ## Deployment
 
+Live URL: https://web3task-drawing-game.onrender.com
+
 The included `render.yaml` defines a Render web service with `npm install`, `npm start`, and `/health` checks. Push this project to a GitHub repository, create a Blueprint deployment in Render from that repository, and wait for the service URL. Set `ALLOWED_ORIGIN` to the public app origin, then open the deployed URL in multiple browser sessions to verify room creation, reconnection, drawing, and scoring. The in-memory room model supports a single server process; horizontal scaling requires a shared Socket.IO adapter and shared room/game state.
+
+Vercel and Netlify are best used only for a static frontend paired with a separate WebSocket backend. This project is configured as a full-stack Render service because Socket.IO needs a long-running Node server.
 
 ## Screenshots
 
