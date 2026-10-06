@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: quickdraw-drawing-game
+    runtime: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production

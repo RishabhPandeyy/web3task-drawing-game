@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f5f6f2">
+  <title>Quickdraw | Draw. Guess. Repeat.</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+  <script src="/socket.io/socket.io.js" defer></script>
+  <script src="/js/index.js" defer></script>
+</head>
+<body class="home-page">
+  <header class="site-header">
+    <a class="brand" href="/" aria-label="Quickdraw home"><span class="brand-mark" aria-hidden="true">qd</span><span>quickdraw<span class="brand-period">.</span></span></a>
+    <div class="header-note"><span class="live-dot"></span> rooms are live</div>
+  </header>
+  <main class="home-layout">
+    <section class="home-copy">
+      <p class="eyebrow"><span class="eyebrow-line"></span> THE PARTY GAME, IN YOUR BROWSER</p>
+      <h1>Make a mess.<br>Make it <span class="headline-accent">make sense.</span></h1>
+      <p class="home-description">One person draws. Everyone else guesses. Good luck explaining that one.</p>
+      <div class="game-facts"><span><strong>02–08</strong> players</span><span class="fact-divider"></span><span><strong>03</strong> rounds</span><span class="fact-divider"></span><span><strong>60s</strong> per sketch</span></div>
+    </section>
+    <section class="entry-panel" aria-labelledby="entry-title">
+      <div class="panel-heading"><div><p class="eyebrow">GET THE GROUP TOGETHER</p><h2 id="entry-title">Ready when you are.</h2></div><span class="panel-spark" aria-hidden="true">✳</span></div>
+      <form id="create-form" class="entry-form">
+        <label for="player-name">YOUR NAME</label>
+        <input id="player-name" name="name" maxlength="18" autocomplete="nickname" placeholder="What should we call you?" required>
+        <button class="button button-primary button-full" type="submit"><span>Create a room</span><span aria-hidden="true">↗</span></button>
+      </form>
+      <div class="form-divider"><span></span><small>OR JOIN YOUR FRIENDS</small><span></span></div>
+      <form id="join-form" class="join-form">
+        <label for="room-code">ROOM CODE</label>
+        <div class="join-row"><input id="room-code" name="roomCode" maxlength="5" autocomplete="off" placeholder="e.g. 4KJ8M" aria-label="Room code" required><button class="button button-secondary" type="submit">Join room <span aria-hidden="true">→</span></button></div>
+      </form>
+      <p id="home-error" class="form-error" role="alert" aria-live="polite"></p>
+      <div class="panel-foot"><span class="lock-icon" aria-hidden="true">◈</span> Private rooms. No account needed.</div>
+    </section>
+  </main>
+  <div class="home-art" aria-hidden="true"><span class="art-star">✳</span><span class="art-scribble">∿</span><span class="art-loop"></span></div>
+  <footer class="site-footer"><span>QUICKDRAW / DRAWING ROOM</span><span>MADE FOR BAD ART & GOOD COMPANY</span></footer>
+</body>
+</html>
