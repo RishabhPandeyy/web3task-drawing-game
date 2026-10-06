@@ -36,6 +36,12 @@ function cleanWord(value) {
   return String(value || '').replace(/[<>\u0000-\u001f]/g, '').trim().slice(0, 28);
 }
 
+function cleanAvatar(value) {
+  const avatarIndex = Number(value);
+  if (!Number.isFinite(avatarIndex)) return 0;
+  return Math.max(0, Math.min(7, Math.round(avatarIndex)));
+}
+
 function normalizeSettings(settings = {}) {
   const customWords = String(settings.customWords || '')
     .split(/[\n,]+/)
@@ -55,12 +61,12 @@ function normalizeSettings(settings = {}) {
   };
 }
 
-function createRoom(rooms, socketId, name, playerToken, settings = {}) {
+function createRoom(rooms, socketId, name, playerToken, settings = {}, avatar = 0) {
   const cleanPlayerName = cleanName(name);
   if (!cleanPlayerName) throw new Error('Enter a player name first.');
   const code = makeRoomCode(rooms);
   const roomSettings = normalizeSettings(settings);
-  const player = { id: playerToken, name: cleanPlayerName, score: 0, isHost: true, connected: true, guessedCorrectly: false };
+  const player = { id: playerToken, name: cleanPlayerName, avatar: cleanAvatar(avatar), score: 0, isHost: true, connected: true, guessedCorrectly: false };
   const room = {
     code, hostId: player.id, players: new Map([[player.id, player]]),
     status: 'lobby', currentDrawerId: null, currentRound: 0, totalRounds: roomSettings.rounds,
@@ -73,7 +79,7 @@ function createRoom(rooms, socketId, name, playerToken, settings = {}) {
   return { room, player };
 }
 
-function joinRoom(rooms, codeValue, socketId, name, playerToken) {
+function joinRoom(rooms, codeValue, socketId, name, playerToken, avatar = 0) {
   const code = String(codeValue || '').trim().toUpperCase();
   const room = rooms.get(code);
   if (!room) throw new Error('Room not found. Check the code and try again.');
@@ -83,7 +89,7 @@ function joinRoom(rooms, codeValue, socketId, name, playerToken) {
   const duplicate = [...room.players.values()].find((player) => player.name.toLocaleLowerCase() === cleanPlayerName.toLocaleLowerCase());
   if (duplicate) throw new Error('That player name is already in this room.');
   if (room.players.size >= room.settings.maxPlayers) throw new Error(`This room is full (${room.settings.maxPlayers} players maximum).`);
-  const player = { id: playerToken, name: cleanPlayerName, score: 0, isHost: false, connected: true, guessedCorrectly: false };
+  const player = { id: playerToken, name: cleanPlayerName, avatar: cleanAvatar(avatar), score: 0, isHost: false, connected: true, guessedCorrectly: false };
   room.players.set(player.id, player);
   return { room, player };
 }
@@ -126,8 +132,8 @@ function getPublicRoom(room) {
       isPublic: room.settings.isPublic,
       wordMode: room.settings.wordMode
     },
-    players: [...room.players.values()].map(({ id, name, score, isHost, connected, guessedCorrectly }) => ({ id, name, score, isHost, connected, guessedCorrectly }))
+    players: [...room.players.values()].map(({ id, name, avatar, score, isHost, connected, guessedCorrectly }) => ({ id, name, avatar, score, isHost, connected, guessedCorrectly }))
   };
 }
 
-module.exports = { DEFAULT_SETTINGS, MAX_PLAYERS, cleanName, normalizeSettings, createRoom, joinRoom, getRoom, getJoinablePublicRoom, listPublicRooms, getPublicRoom };
+module.exports = { DEFAULT_SETTINGS, MAX_PLAYERS, cleanName, cleanAvatar, normalizeSettings, createRoom, joinRoom, getRoom, getJoinablePublicRoom, listPublicRooms, getPublicRoom };

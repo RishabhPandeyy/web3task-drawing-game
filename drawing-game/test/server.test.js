@@ -36,6 +36,15 @@ test('normalizes host-configurable room settings', () => {
   assert.deepEqual(settings.customWords, ['Alpha', 'Beta', 'Gamma']);
 });
 
+test('keeps selected player avatars in public room snapshots', () => {
+  const rooms = new Map();
+  const { room } = createRoom(rooms, 'socket-a', 'Ada', 'player-a', {}, 3);
+  joinRoom(rooms, room.code, 'socket-b', 'Lin', 'player-b', 12);
+  const snapshot = getPublicRoom(room);
+  assert.equal(snapshot.players[0].avatar, 3);
+  assert.equal(snapshot.players[1].avatar, 7);
+});
+
 test('public room snapshots never include selected words or word choices', () => {
   const rooms = new Map();
   const { room } = createRoom(rooms, 'socket-a', 'Ada', 'player-a');

@@ -247,10 +247,10 @@ function createGameManager(io, rooms, socketPlayers) {
   }
 
   function register(socket) {
-    socket.on('create_room', ({ name, playerId, settings } = {}, callback = () => {}) => {
+    socket.on('create_room', ({ name, playerId, settings, avatar } = {}, callback = () => {}) => {
       try {
         const identity = playerId || socket.id;
-        const { room, player } = createRoom(rooms, socket.id, name, identity, settings);
+        const { room, player } = createRoom(rooms, socket.id, name, identity, settings, avatar);
         socketPlayers.set(socket.id, { roomCode: room.code, playerId: player.id });
         socket.join(room.code);
         callback({ ok: true, roomCode: room.code, playerId: player.id });
@@ -260,12 +260,12 @@ function createGameManager(io, rooms, socketPlayers) {
 
     socket.on('list_public_rooms', (callback = () => {}) => callback({ ok: true, rooms: listPublicRooms(rooms) }));
 
-    socket.on('join_public_room', ({ name, playerId } = {}, callback = () => {}) => {
+    socket.on('join_public_room', ({ name, playerId, avatar } = {}, callback = () => {}) => {
       try {
         const room = getJoinablePublicRoom(rooms);
         if (!room) throw new Error('No public rooms are waiting right now.');
         const identity = playerId || socket.id;
-        const joined = joinRoom(rooms, room.code, socket.id, name, identity);
+        const joined = joinRoom(rooms, room.code, socket.id, name, identity, avatar);
         socketPlayers.set(socket.id, { roomCode: joined.room.code, playerId: joined.player.id });
         socket.join(joined.room.code);
         callback({ ok: true, roomCode: joined.room.code, playerId: joined.player.id });
@@ -274,7 +274,7 @@ function createGameManager(io, rooms, socketPlayers) {
       } catch (error) { callback({ ok: false, error: error.message }); }
     });
 
-    socket.on('join_room', ({ roomCode, name, playerId } = {}, callback = () => {}) => {
+    socket.on('join_room', ({ roomCode, name, playerId, avatar } = {}, callback = () => {}) => {
       try {
         const normalizedCode = String(roomCode || '').trim().toUpperCase();
         const existingRoom = rooms.get(normalizedCode);
@@ -284,7 +284,7 @@ function createGameManager(io, rooms, socketPlayers) {
           return;
         }
         const identity = playerId || socket.id;
-        const { room, player } = joinRoom(rooms, roomCode, socket.id, name, identity);
+        const { room, player } = joinRoom(rooms, roomCode, socket.id, name, identity, avatar);
         socketPlayers.set(socket.id, { roomCode: room.code, playerId: player.id });
         socket.join(room.code);
         callback({ ok: true, roomCode: room.code, playerId: player.id });

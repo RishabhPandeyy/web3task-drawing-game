@@ -1,4 +1,4 @@
-const socket = io("https://web3task-drawing-game.onrender.com");
+const socket = io();
 const roomCode = new URLSearchParams(window.location.search).get('room')?.toUpperCase();
 const sessionKey = `quickdraw:${roomCode}`;
 const playerSession = JSON.parse(sessionStorage.getItem(sessionKey) || 'null');
@@ -131,6 +131,32 @@ function receiveStrokePoint(payload, starts, ends) {
   }
 }
 
+function avatarIndex(player) {
+  if (Number.isFinite(Number(player.avatar))) return Math.max(0, Math.min(7, Number(player.avatar)));
+  const source = `${player.id || ''}:${player.name || ''}`;
+  let hash = 0;
+  for (const character of source) hash = (hash * 31 + character.charCodeAt(0)) % 9973;
+  return hash % 8;
+}
+
+function createAvatar(player) {
+  const avatar = document.createElement('span');
+  avatar.className = `score-avatar character-avatar character-avatar-${avatarIndex(player)}`;
+  avatar.setAttribute('role', 'img');
+  avatar.setAttribute('aria-label', `${player.name} avatar`);
+  const face = document.createElement('span');
+  face.className = 'avatar-face';
+  const hair = document.createElement('span');
+  hair.className = 'avatar-hair';
+  const eyes = document.createElement('span');
+  eyes.className = 'avatar-eyes';
+  const smile = document.createElement('span');
+  smile.className = 'avatar-smile';
+  face.append(hair, eyes, smile);
+  avatar.append(face);
+  return avatar;
+}
+
 function renderPlayers(players) {
   scoreList.replaceChildren();
   const ordered = [...players].sort((left, right) => right.score - left.score);
@@ -141,6 +167,7 @@ function renderPlayers(players) {
     const rank = document.createElement('span');
     rank.className = 'score-rank';
     rank.textContent = String(index + 1).padStart(2, '0');
+    const avatar = createAvatar(player);
     const name = document.createElement('span');
     name.className = 'score-player-name';
     name.textContent = player.name;
@@ -150,7 +177,7 @@ function renderPlayers(players) {
     const score = document.createElement('strong');
     score.className = 'score-value';
     score.textContent = player.score.toLocaleString();
-    row.append(rank, name, role, score);
+    row.append(rank, avatar, name, role, score);
     scoreList.append(row);
   });
 }

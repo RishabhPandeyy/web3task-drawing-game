@@ -54,6 +54,13 @@ h1, h2, p { margin-top: 0; }
 .entry-form input, .entry-form select, .join-row input { height: 46px; padding: 0 13px; }
 .entry-form textarea { min-height: 58px; resize: vertical; padding: 10px 13px; }
 .entry-form input::placeholder, .entry-form textarea::placeholder, .join-row input::placeholder { color: #a3aaa6; }
+.avatar-picker { display: grid; gap: 8px; margin: 2px 0 3px; padding: 0; border: 0; }
+.avatar-picker legend { margin-bottom: 1px; padding: 0; color: #76807c; font-family: var(--mono); font-size: 9px; letter-spacing: .11em; }
+.avatar-options { display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); gap: 6px; }
+.avatar-choice { display: grid; height: 42px; min-width: 0; place-items: center; border: 1px solid #dce1dc; border-radius: 5px; background: #fbfcf9; cursor: pointer; }
+.avatar-choice:hover { border-color: #9ea9a4; }
+.avatar-choice.selected { border-color: var(--green); background: #edf6ef; box-shadow: 0 0 0 2px rgba(39, 141, 120, .13); }
+.avatar-choice-preview { width: 30px; height: 30px; }
 .private-options { display: grid; gap: 9px; padding-top: 4px; }
 .settings-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin: 6px 0 2px; }
 .settings-grid label { display: grid; gap: 6px; }
@@ -68,6 +75,68 @@ h1, h2, p { margin-top: 0; }
 .button-secondary:hover:not(:disabled) { border-color: #9ea9a4; }
 .button-full { width: 100%; }
 .entry-form .button span:first-child { flex: 1; text-align: left; }
+.character-avatar {
+  --avatar-bg: #dcece5;
+  --avatar-skin: #f2bf8f;
+  --avatar-hair: #27302d;
+  position: relative;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border: 1px solid rgba(32, 37, 38, .08);
+  border-radius: 50%;
+  background: var(--avatar-bg);
+  box-shadow: inset 0 -5px 0 rgba(32, 37, 38, .05);
+}
+.avatar-face {
+  position: relative;
+  display: block;
+  width: 70%;
+  height: 72%;
+  margin-top: 12%;
+  border-radius: 48% 48% 44% 44%;
+  background: var(--avatar-skin);
+}
+.avatar-hair {
+  position: absolute;
+  top: -8%;
+  left: 6%;
+  right: 6%;
+  height: 34%;
+  border-radius: 50% 50% 38% 38%;
+  background: var(--avatar-hair);
+}
+.avatar-eyes::before, .avatar-eyes::after {
+  position: absolute;
+  top: 45%;
+  width: 10%;
+  height: 10%;
+  border-radius: 50%;
+  background: #202526;
+  content: '';
+}
+.avatar-eyes::before { left: 31%; }
+.avatar-eyes::after { right: 31%; }
+.avatar-smile {
+  position: absolute;
+  left: 36%;
+  bottom: 22%;
+  width: 28%;
+  height: 14%;
+  border-bottom: 2px solid rgba(32, 37, 38, .72);
+  border-radius: 0 0 999px 999px;
+}
+.character-avatar-0 { --avatar-bg: #dcece5; --avatar-skin: #f1bd8d; --avatar-hair: #202526; }
+.character-avatar-1 { --avatar-bg: #fbe6dc; --avatar-skin: #d99668; --avatar-hair: #6b3b27; }
+.character-avatar-2 { --avatar-bg: #e3eafb; --avatar-skin: #f0c7a1; --avatar-hair: #31599f; }
+.character-avatar-3 { --avatar-bg: #f7edd3; --avatar-skin: #b87852; --avatar-hair: #2e2723; }
+.character-avatar-4 { --avatar-bg: #eee3f4; --avatar-skin: #e7ad79; --avatar-hair: #774c87; }
+.character-avatar-5 { --avatar-bg: #dff1ee; --avatar-skin: #f3cfaa; --avatar-hair: #176754; }
+.character-avatar-6 { --avatar-bg: #f8dfdf; --avatar-skin: #c7835b; --avatar-hair: #9b3b35; }
+.character-avatar-7 { --avatar-bg: #e8edda; --avatar-skin: #efb98a; --avatar-hair: #826219; }
+.character-avatar-1 .avatar-hair, .character-avatar-6 .avatar-hair { border-radius: 54% 28% 46% 30%; transform: rotate(-4deg); }
+.character-avatar-2 .avatar-hair, .character-avatar-5 .avatar-hair { top: -3%; height: 25%; border-radius: 999px; }
+.character-avatar-3 .avatar-hair, .character-avatar-7 .avatar-hair { left: 0; right: 20%; height: 39%; border-radius: 48% 45% 55% 26%; }
 .form-divider { display: flex; align-items: center; gap: 10px; margin: 21px 0; }
 .form-divider span { height: 1px; flex: 1; background: #e3e6e2; }
 .form-divider small { color: #929b97; font-family: var(--mono); font-size: 8px; letter-spacing: .08em; white-space: nowrap; }
@@ -101,6 +170,8 @@ h1, h2, p { margin-top: 0; }
   .game-facts strong { font-size: 11px; }
   .join-row { flex-direction: column; }
   .room-mode-actions { grid-template-columns: 1fr; }
+  .avatar-options { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .avatar-choice { height: 44px; }
   .settings-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .join-row .button { width: 100%; }
   .site-footer span:last-child { text-align: right; }

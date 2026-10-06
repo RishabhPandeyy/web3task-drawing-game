@@ -1,13 +1,15 @@
-const socket = io("https://web3task-drawing-game.onrender.com");
+const socket = io();
 const nameInput = document.querySelector('#player-name');
 const roomInput = document.querySelector('#room-code');
 const errorMessage = document.querySelector('#home-error');
+const avatarOptions = document.querySelector('#avatar-options');
 const privateOptions = document.querySelector('#private-options');
 const privateToggle = document.querySelector('#private-room-toggle');
 const createRoomButton = document.querySelector('#create-room-button');
 const privateToggleLabel = privateToggle.querySelector('span:first-child');
 const privateToggleIcon = privateToggle.querySelector('span:last-child');
 let privateMode = false;
+let selectedAvatar = Number(localStorage.getItem('quickdraw:avatar') || 0);
 
 function showError(message) {
   errorMessage.textContent = message;
@@ -30,9 +32,43 @@ function collectSettings(isPrivate = false) {
   };
 }
 
+function avatarMarkup(index, sizeClass = 'avatar-choice-preview') {
+  const avatar = document.createElement('span');
+  avatar.className = `${sizeClass} character-avatar character-avatar-${index}`;
+  const face = document.createElement('span');
+  face.className = 'avatar-face';
+  const hair = document.createElement('span');
+  hair.className = 'avatar-hair';
+  const eyes = document.createElement('span');
+  eyes.className = 'avatar-eyes';
+  const smile = document.createElement('span');
+  smile.className = 'avatar-smile';
+  face.append(hair, eyes, smile);
+  avatar.append(face);
+  return avatar;
+}
+
+function renderAvatarOptions() {
+  avatarOptions.replaceChildren();
+  for (let index = 0; index < 8; index += 1) {
+    const button = document.createElement('button');
+    button.className = `avatar-choice${index === selectedAvatar ? ' selected' : ''}`;
+    button.type = 'button';
+    button.setAttribute('aria-label', `Choose avatar ${index + 1}`);
+    button.setAttribute('aria-pressed', String(index === selectedAvatar));
+    button.append(avatarMarkup(index));
+    button.addEventListener('click', () => {
+      selectedAvatar = index;
+      localStorage.setItem('quickdraw:avatar', String(selectedAvatar));
+      renderAvatarOptions();
+    });
+    avatarOptions.append(button);
+  }
+}
+
 function enterRoom(result, name) {
   const key = `quickdraw:${result.roomCode}`;
-  sessionStorage.setItem(key, JSON.stringify({ playerId: result.playerId, name: name.trim() }));
+  sessionStorage.setItem(key, JSON.stringify({ playerId: result.playerId, name: name.trim(), avatar: selectedAvatar }));
   window.location.assign(`/lobby.html?room=${encodeURIComponent(result.roomCode)}`);
 }
 
@@ -41,7 +77,7 @@ document.querySelector('#create-form').addEventListener('submit', (event) => {
   const name = nameInput.value.trim();
   if (!name) return showError('Add your name before creating a room.');
   showError('');
-  socket.emit('create_room', { name, playerId: crypto.randomUUID(), settings: collectSettings(privateMode) }, (result) => {
+  socket.emit('create_room', { name, playerId: crypto.randomUUID(), avatar: selectedAvatar, settings: collectSettings(privateMode) }, (result) => {
     if (!result?.ok) return showError(result?.error || 'Could not create the room. Try again.');
     enterRoom(result, name);
   });
@@ -64,7 +100,7 @@ document.querySelector('#join-form').addEventListener('submit', (event) => {
   if (!name) return showError('Add your name before joining a room.');
   if (!roomCode) return showError('Enter a room code to join.');
   showError('');
-  socket.emit('join_room', { roomCode, name, playerId: crypto.randomUUID() }, (result) => {
+  socket.emit('join_room', { roomCode, name, playerId: crypto.randomUUID(), avatar: selectedAvatar }, (result) => {
     if (!result?.ok) return showError(result?.error || 'Could not join the room. Try again.');
     enterRoom(result, name);
   });
@@ -74,7 +110,7 @@ document.querySelector('#join-public').addEventListener('click', () => {
   const name = nameInput.value.trim();
   if (!name) return showError('Add your name before joining a public room.');
   showError('');
-  socket.emit('join_public_room', { name, playerId: crypto.randomUUID() }, (result) => {
+  socket.emit('join_public_room', { name, playerId: crypto.randomUUID(), avatar: selectedAvatar }, (result) => {
     if (!result?.ok) return showError(result?.error || 'No public room is available.');
     enterRoom(result, name);
   });
@@ -87,3 +123,5 @@ if (params.has('room')) {
   roomInput.value = params.get('room').toUpperCase();
   nameInput.focus();
 }
+
+renderAvatarOptions();

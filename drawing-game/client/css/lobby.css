@@ -21,11 +21,7 @@
 .player-list { display: grid; gap: 2px; max-height: 280px; min-height: 68px; overflow-y: auto; margin: 0; padding: 0; list-style: none; }
 .player-row { display: flex; min-height: 54px; align-items: center; gap: 11px; padding: 6px 8px; border-bottom: 1px solid #eff1ee; animation: arrive .24s both; }
 .player-row.disconnected { opacity: .55; }
-.player-avatar { display: grid; place-items: center; width: 34px; height: 34px; flex: 0 0 auto; border-radius: 50%; background: #dcece5; color: #176754; font-family: var(--mono); font-size: 10px; font-weight: 500; }
-.avatar-1 { background: #fbe6dc; color: #a64731; }
-.avatar-2 { background: #e3eafb; color: #3557a3; }
-.avatar-3 { background: #f7edd3; color: #826219; }
-.avatar-4 { background: #eee3f4; color: #774c87; }
+.player-avatar { width: 36px; height: 36px; flex: 0 0 auto; }
 .player-name { flex: 1; overflow: hidden; color: #303938; font-size: 12px; font-weight: 700; text-overflow: ellipsis; white-space: nowrap; }
 .host-tag, .player-presence { color: var(--green); font-family: var(--mono); font-size: 8px; letter-spacing: .08em; }
 .player-presence { color: #9aa39f; }

@@ -1,4 +1,4 @@
-const socket = io("https://web3task-drawing-game.onrender.com");
+const socket = io();
 const roomCode = new URLSearchParams(window.location.search).get('room')?.toUpperCase();
 const sessionKey = `quickdraw:${roomCode}`;
 const playerSession = JSON.parse(sessionStorage.getItem(sessionKey) || 'null');
@@ -18,7 +18,31 @@ roomCodeDisplay.textContent = roomCode || '-----';
 footerCode.textContent = roomCode || '-----';
 
 function setError(message) { errorMessage.textContent = message || ''; }
-function addInitials(name) { return name.split(/\s+/).slice(0, 2).map((word) => word[0]).join('').toUpperCase(); }
+function avatarIndex(player) {
+  if (Number.isFinite(Number(player.avatar))) return Math.max(0, Math.min(7, Number(player.avatar)));
+  const source = `${player.id || ''}:${player.name || ''}`;
+  let hash = 0;
+  for (const character of source) hash = (hash * 31 + character.charCodeAt(0)) % 9973;
+  return hash % 8;
+}
+
+function createAvatar(player) {
+  const avatar = document.createElement('span');
+  avatar.className = `player-avatar character-avatar character-avatar-${avatarIndex(player)}`;
+  avatar.setAttribute('role', 'img');
+  avatar.setAttribute('aria-label', `${player.name} avatar`);
+  const face = document.createElement('span');
+  face.className = 'avatar-face';
+  const hair = document.createElement('span');
+  hair.className = 'avatar-hair';
+  const eyes = document.createElement('span');
+  eyes.className = 'avatar-eyes';
+  const smile = document.createElement('span');
+  smile.className = 'avatar-smile';
+  face.append(hair, eyes, smile);
+  avatar.append(face);
+  return avatar;
+}
 
 function renderPlayers(room) {
   currentRoom = room;
@@ -41,12 +65,10 @@ function renderPlayers(room) {
     })
   );
   playerList.replaceChildren();
-  players.forEach((player, index) => {
+  players.forEach((player) => {
     const item = document.createElement('li');
     item.className = `player-row${player.connected ? '' : ' disconnected'}`;
-    const avatar = document.createElement('span');
-    avatar.className = `player-avatar avatar-${index % 5}`;
-    avatar.textContent = addInitials(player.name);
+    const avatar = createAvatar(player);
     const name = document.createElement('span');
     name.className = 'player-name';
     name.textContent = player.name;
