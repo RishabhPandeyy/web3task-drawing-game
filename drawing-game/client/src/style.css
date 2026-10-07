@@ -390,6 +390,34 @@ legend {
   grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
   gap: 48px;
 }
+.room-code-area {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px 24px;
+  padding: 18px 0;
+  margin-bottom: 16px;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+}
+.room-code-area > div {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+}
+.room-code-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: #526059;
+}
+.room-code-value {
+  font-family: ui-monospace, monospace;
+  font-size: 32px;
+  font-weight: 700;
+  color: #176248;
+  user-select: all;
+  overflow-wrap: anywhere;
+}
 .section-title {
   display: flex;
   justify-content: space-between;

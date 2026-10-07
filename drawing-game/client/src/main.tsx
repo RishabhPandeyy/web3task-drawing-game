@@ -832,6 +832,7 @@ function Lobby({
   setError,
 }: LobbyProps) {
   const [copied, setCopied] = useState(false);
+  const [codeCopied, setCodeCopied] = useState(false);
   const active = room.players.filter(
     (player) => player.connected && !player.spectator,
   );
@@ -846,6 +847,15 @@ function Lobby({
       setError(`Invite link: ${url}`);
     }
   }
+  async function copyCode() {
+    try {
+      await navigator.clipboard.writeText(room.roomCode);
+      setCodeCopied(true);
+      setTimeout(() => setCodeCopied(false), 2000);
+    } catch {
+      setError(`Room code: ${room.roomCode}`);
+    }
+  }
   return (
     <main className="lobby">
       <div className="section-heading">
@@ -853,6 +863,21 @@ function Lobby({
           {room.settings.isPublic ? "PUBLIC ROOM" : "PRIVATE ROOM"}
         </p>
         <h1>Room {room.roomCode}</h1>
+        <div className="room-code-area" aria-label="Room code">
+          <div>
+            <span className="room-code-label">ROOM CODE</span>
+            <output
+              className="room-code-value"
+              aria-label="Shareable room code"
+            >
+              {room.roomCode}
+            </output>
+          </div>
+          <button type="button" className="button secondary" onClick={copyCode}>
+            {codeCopied ? <Check size={18} /> : <Copy size={18} />}
+            {codeCopied ? "Code copied" : "Copy code"}
+          </button>
+        </div>
         <button className="button secondary" onClick={invite}>
           {copied ? <Check size={18} /> : <Copy size={18} />}
           {copied ? "Link copied" : "Copy invite link"}
