@@ -63,6 +63,7 @@ npm run check
 
 - `PORT`: HTTP port (defaults to `3000`; hosting providers can supply their own port).
 - `ALLOWED_ORIGIN`: optional Socket.IO CORS origin. Defaults to `*` for easy local use; set it to the deployed site's origin in production.
+- `GAME_SERVER_URL`: backend origin used by `npm run build` for the static Vercel frontend. This is public browser configuration, not a secret. Local `npm start` connects to the same origin without this variable.
 
 ## How the Game Works
 
@@ -84,7 +85,17 @@ Live URL: https://web3task-drawing-game.onrender.com
 
 The included `render.yaml` defines a Render web service with `npm install`, `npm start`, and `/health` checks. Push this project to a GitHub repository, create a Blueprint deployment in Render from that repository, and wait for the service URL. Set `ALLOWED_ORIGIN` to the public app origin, then open the deployed URL in multiple browser sessions to verify room creation, reconnection, drawing, and scoring. The in-memory room model supports a single server process; horizontal scaling requires a shared Socket.IO adapter and shared room/game state.
 
-Vercel and Netlify are best used only for a static frontend paired with a separate WebSocket backend. This project is configured as a full-stack Render service because Socket.IO needs a long-running Node server.
+### Vercel Frontend With Render Backend
+
+1. Keep the Node server deployed on Render using `npm install` and `npm start`. Verify that its `/health` endpoint returns `ok: true`.
+2. In Vercel, set the project Root Directory to `drawing-game` (or the repository root if it already contains this package). Use Framework Preset `Other`, Build Command `npm run build`, and Output Directory `dist` as configured in `vercel.json`.
+3. Add `GAME_SERVER_URL` to Vercel's environment variables for Production and Preview, using your backend origin, for example `https://web3task-drawing-game.onrender.com`. Redeploy after changing it.
+4. If Render has `ALLOWED_ORIGIN` set, change it to your Vercel site origin, with no trailing slash. The default `*` also permits Vercel previews. Restart/redeploy the backend after changing its environment variables.
+5. Open the Vercel site in two browser sessions, create and join a new room, and start the game.
+
+The static build includes the Socket.IO browser library and generates `/js/config.js` with the backend origin. All three pages connect directly to that backend; the Vercel deployment only serves the frontend. Local development and the full-stack Render site still connect to their own origin.
+
+Vercel also supports WebSockets in Functions, but this game's in-memory rooms and timers assume one persistent server process. Moving the backend to Functions requires shared game state and coordination across instances, rather than only changing the deployment settings.
 
 ## Screenshots
 

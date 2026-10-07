@@ -5,6 +5,7 @@
   "description": "A real-time multiplayer drawing and guessing game built with vanilla JavaScript and Socket.IO.",
   "main": "server/server.js",
   "scripts": {
+    "build": "node scripts/build-client.js",
     "start": "node server/server.js",
     "dev": "node --watch server/server.js",
     "test": "node --test",

@@ -1,4 +1,4 @@
-const socket = io();
+const socket = io(window.QUICKDRAW_CONFIG.serverUrl || undefined);
 const nameInput = document.querySelector('#player-name');
 const roomInput = document.querySelector('#room-code');
 const errorMessage = document.querySelector('#home-error');
@@ -14,6 +14,9 @@ let selectedAvatar = Number(localStorage.getItem('quickdraw:avatar') || 0);
 function showError(message) {
   errorMessage.textContent = message;
 }
+
+socket.on('connect_error', () => showError('Cannot reach the game server. Retrying...'));
+socket.on('connect', () => showError(''));
 
 function numberValue(selector) {
   return Number(document.querySelector(selector).value);
