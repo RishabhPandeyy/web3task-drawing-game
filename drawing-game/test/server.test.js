@@ -76,3 +76,12 @@ test('keeps normalized drawing widths small and clamps untrusted point data', ()
   assert.equal(sanitizeDrawing({ x: 'invalid', y: 0.5 }), null);
   assert.equal(sanitizeDrawing({ x: 0.5, y: 0.5, size: 10 }).size, 0.1);
 });
+
+test('serves socket.io from the current deployment origin instead of a hardcoded URL', () => {
+  const files = ['index.html', 'lobby.html', 'game.html'];
+  for (const file of files) {
+    const html = require('node:fs').readFileSync(require('node:path').join(__dirname, '..', 'client', file), 'utf8');
+    assert.match(html, /src="\/socket\.io\/socket\.io\.js"/);
+    assert.doesNotMatch(html, /web3task-drawing-game\.onrender\.com/);
+  }
+});
