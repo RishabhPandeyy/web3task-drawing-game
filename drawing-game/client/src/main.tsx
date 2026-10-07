@@ -201,7 +201,10 @@ function App() {
         setError("Cannot reach the game server. Retrying...");
       },
       room_updated: setRoom,
-      game_state: setPrivateState,
+      game_state: (state: PrivateState) => {
+        setPrivateState(state);
+        setRoom(state);
+      },
       canvas_snapshot: setCanvasSnapshot,
       chat_message: add,
       correct_guess: ({

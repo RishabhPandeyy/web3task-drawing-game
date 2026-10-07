@@ -52,6 +52,10 @@ test("two players ready up, draw, guess, score, replay and restore canvas on mob
   ).toBeVisible();
   const word = await host.locator(".word-choices button").first().textContent();
   await host.locator(".word-choices button").first().click();
+  await expect(host.getByLabel('Seconds remaining')).toHaveText(/^\d+$/);
+  await expect(guest.getByLabel('Seconds remaining')).toHaveText(/^\d+$/);
+  const initialSeconds = Number(await guest.getByLabel('Seconds remaining').textContent());
+  await expect.poll(async () => Number(await guest.getByLabel('Seconds remaining').textContent())).toBeLessThan(initialSeconds);
   await expect(
     host.getByRole("button", { name: "Brush", exact: true }),
   ).toBeEnabled();
