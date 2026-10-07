@@ -3,7 +3,7 @@ const { scoreCorrectGuess, scoreDrawer } = require('./scoring');
 const { getPublicRoom, createRoom, joinRoom, getJoinablePublicRoom, listPublicRooms } = require('./roomManager');
 
 const ROUND_SECONDS = 60;
-const DISCONNECT_GRACE_MS = 20000;
+const DISCONNECT_GRACE_MS = 60000;
 
 function sanitizeDrawing(payload) {
   if (!payload || typeof payload !== 'object') return null;

@@ -6,7 +6,11 @@ const { createGameManager } = require('./gameManager');
 
 const app = express();
 const server = http.createServer(app);
-const io = new Server(server, { cors: { origin: process.env.ALLOWED_ORIGIN || '*' }, pingInterval: 25000, pingTimeout: 20000 });
+const io = new Server(server, {
+  cors: { origin: process.env.ALLOWED_ORIGIN || '*' },
+  pingInterval: 20000,
+  pingTimeout: 60000
+});
 const rooms = new Map();
 const socketPlayers = new Map();
 const clientPath = path.join(__dirname, '..', 'client');

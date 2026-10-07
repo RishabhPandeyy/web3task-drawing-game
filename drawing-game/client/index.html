@@ -9,7 +9,8 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/css/style.css">
-<script src="/socket.io/socket.io.js" defer></script>  <script src="/js/index.js" defer></script>
+  <script src="/socket.io/socket.io.js" defer></script>
+  <script src="/js/index.js" defer></script>
 </head>
 <body class="home-page">
   <header class="site-header">
@@ -28,10 +29,6 @@
       <form id="create-form" class="entry-form">
         <label for="player-name">YOUR NAME</label>
         <input id="player-name" name="name" maxlength="18" autocomplete="nickname" placeholder="What should we call you?" required>
-        <fieldset class="avatar-picker" aria-label="Choose avatar">
-          <legend>CHOOSE AVATAR</legend>
-          <div id="avatar-options" class="avatar-options"></div>
-        </fieldset>
         <div id="private-options" class="private-options" hidden>
           <div class="settings-grid" aria-label="Private room settings">
             <label>PLAYERS<input id="max-players" type="number" min="2" max="20" value="8"></label>
