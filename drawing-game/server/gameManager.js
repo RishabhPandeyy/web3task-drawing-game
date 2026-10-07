@@ -229,6 +229,9 @@ function createGameManager(io, rooms, socketPlayers) {
     const room = rooms.get(identity.roomCode);
     const player = room?.players.get(identity.playerId);
     if (!room || !player) return;
+    // Page navigation can connect the lobby before the home socket closes.
+    const hasActiveSocket = [...socketPlayers.values()].some((entry) => entry.roomCode === identity.roomCode && entry.playerId === identity.playerId);
+    if (hasActiveSocket) return;
     player.connected = false;
     emitRoom(room);
     const timer = setTimeout(() => {
