@@ -1,6 +1,13 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": null,
+  "installCommand": "npm ci --include=dev",
   "buildCommand": "npm run build",
-  "outputDirectory": "dist"
+  "outputDirectory": "dist",
+  "rewrites": [
+    { "source": "/lobby", "destination": "/index.html" },
+    { "source": "/game", "destination": "/index.html" },
+    { "source": "/lobby.html", "destination": "/index.html" },
+    { "source": "/game.html", "destination": "/index.html" }
+  ]
 }

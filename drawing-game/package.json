@@ -2,18 +2,34 @@
   "name": "real-time-drawing-game",
   "version": "1.0.0",
   "private": true,
-  "description": "A real-time multiplayer drawing and guessing game built with vanilla JavaScript and Socket.IO.",
+  "description": "A real-time multiplayer drawing and guessing game built with React, TypeScript, Vite and Socket.IO.",
   "main": "server/server.js",
   "scripts": {
-    "build": "node scripts/build-client.js",
+    "build": "npm run typecheck && node scripts/build-client.js",
+    "typecheck": "tsc --noEmit",
     "start": "node server/server.js",
-    "dev": "node --watch server/server.js",
-    "test": "node --test",
-    "check": "node --check server/server.js && node --check server/gameManager.js && node --check server/roomManager.js && node --check server/wordManager.js && node --check server/scoring.js && node --check client/js/index.js && node --check client/js/lobby.js && node --check client/js/game.js"
+    "dev": "node scripts/dev.js",
+    "test": "node --test test/*.test.js",
+    "test:e2e": "playwright test",
+    "check": "node --check server/server.js && node --check server/models.js && node --check server/gameManager.js && node --check server/roomManager.js && node --check server/wordManager.js && node --check server/scoring.js && npm run build"
   },
-  "engines": { "node": ">=18" },
+  "engines": {
+    "node": ">=22.12"
+  },
   "dependencies": {
     "express": "^4.21.2",
-    "socket.io": "^4.8.1"
+    "lucide-react": "^1.52.0",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
+    "socket.io": "^4.8.1",
+    "socket.io-client": "^4.8.4"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.63.0",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "prettier": "^3.9.9",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.3"
   }
 }

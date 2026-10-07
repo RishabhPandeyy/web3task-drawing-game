@@ -34,6 +34,7 @@ test('host can start after lobby resumes before the old home socket disconnects'
   const room = rooms.get(created.roomCode);
   assert.equal(room.players.get('host').connected, true);
   assert.equal(room.disconnectTimers.has('host'), false);
+  guest.send('set_ready', { ready: true }, (result) => assert.equal(result.ok, true));
   lobby.send('start_game', (result) => assert.equal(result.ok, true));
   assert.equal(room.status, 'playing');
   lobby.send('disconnect');
@@ -54,6 +55,7 @@ test('host can start after the old home socket closes before lobby reconnects', 
   assert.equal(room.disconnectTimers.has('host'), false);
   const guest = socket('guest');
   guest.send('join_room', { roomCode: created.roomCode, name: 'Guest', playerId: 'guest' }, (result) => assert.equal(result.ok, true));
+  guest.send('set_ready', { ready: true }, (result) => assert.equal(result.ok, true));
   lobby.send('start_game', (result) => assert.equal(result.ok, true));
   assert.equal(room.status, 'playing');
 });

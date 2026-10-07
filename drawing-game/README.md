@@ -1,102 +1,112 @@
-# Real-Time Multiplayer Drawing Game
+# Quickdraw
 
-Quickdraw is a browser-based drawing and guessing party game. Create a private or public room, invite a group with its short code, and see whether your sketches make any sense to anyone else.
+A multiplayer drawing and guessing game built with the recommended stack: **React + TypeScript + Vite**, HTML5 Canvas, Node.js, Express and Socket.IO.
+
+Frontend: https://web3task-drawing-game.vercel.app
+
+Backend: https://web3task-drawing-game.onrender.com
+
+These deployment URLs serve the latest version only after the updated repository is redeployed.
 
 ## Features
 
-- Private room codes, public room matchmaking, host controls, player limits, and live lobby updates.
-- Host-configurable rounds, player limits, draw time, word choices, hint count, word mode, and custom words.
-- Responsive Canvas drawing with brush, color picker, brush size, eraser, clear, and undo.
-- Live stroke events instead of repeated canvas image uploads.
-- Timed hint reveals, server-checked guesses, speed-based scoring, drawer bonuses, and final standings.
-- Lobby kick controls, post-guess chat, reconnection grace period, and automatic host handoff after disconnect.
-- Mobile-friendly layout with pointer input for mouse, pen, or touch.
+- Public and private rooms, open-room matchmaking, shareable invite links and configurable player limits.
+- Open-room matchmaking waits up to 20 seconds, joins as soon as a public lobby has space, and supports cancellation.
+- Explicit ready-up, host start controls, rotating drawers, word choices, guesses, speed scoring, leaderboards and winner screens.
+- Brush, colors, custom color picker, brush size, eraser, undo and clear.
+- Timed hints, hidden/combination modes, custom words, categories, and English/Hindi word lists.
+- Host kick/ban, majority votekick and reports delivered to the host.
+- Spectators can join a running game without taking turns or scoring. Spectator chat opens between turns.
+- Last-round drawing replay with play/pause and a progress slider.
+- Canvas restoration on reconnect, disconnect grace, host handoff, and play again.
+- Phone layouts with a fixed 4:3 canvas, touch drawing, large controls, and separate Chat/Players tabs.
 
-## Tech Stack
+## Local Development
 
-- HTML5, CSS3, vanilla browser JavaScript, and the Canvas API.
-- Node.js, Express, and Socket.IO.
-- Node's built-in test runner for focused server logic tests.
-
-## Project Structure
-
-```text
-drawing-game/
-├── client/
-│   ├── assets/
-│   ├── css/       # shared, lobby, and game styles
-│   ├── js/        # home, lobby, and game clients
-│   ├── index.html
-│   ├── lobby.html
-│   └── game.html
-├── server/
-│   ├── gameManager.js
-│   ├── roomManager.js
-│   ├── scoring.js
-│   ├── server.js
-│   └── wordManager.js
-├── test/
-│   └── server.test.js
-├── package.json
-└── README.md
-```
-
-## How to Run Locally
-
-Requires Node.js 18 or newer.
+Requires Node.js **22.12+** (Node 24 LTS is suitable).
 
 ```sh
-npm install
+npm ci --include=dev
+npm run dev
+```
+
+Open http://localhost:5173. Vite serves React and proxies Socket.IO to the Node server on port 3000. If port 3000 is occupied, use `PORT=3108 npm run dev`; Vite uses the same backend port. If Vite's port is occupied, use the alternate URL it prints.
+
+For a production build served directly by Express:
+
+```sh
+npm run build
 npm start
 ```
 
-Open [http://localhost:3000](http://localhost:3000) in two or more browser tabs. Create a room in one tab, join with the displayed code in another, then start the game. For automatic server restarts while developing, run `npm run dev`.
+Open http://localhost:3000. To play on a phone on the same Wi-Fi, use the computer's LAN address with the frontend port, for example `http://192.168.1.10:5173`. Phone testing is easiest on the deployed HTTPS Vercel URL; allow local network access through the computer firewall when testing over Wi-Fi.
 
-Run the checks with:
+## Checks
 
 ```sh
 npm test
+npm run typecheck
 npm run check
+npx playwright install chromium
+npm run test:e2e
 ```
 
-## Environment Variables
-
-- `PORT`: HTTP port (defaults to `3000`; hosting providers can supply their own port).
-- `ALLOWED_ORIGIN`: optional Socket.IO CORS origin. Defaults to `*` for easy local use; set it to the deployed site's origin in production.
-- `GAME_SERVER_URL`: backend origin used by `npm run build` for the static Vercel frontend. This is public browser configuration, not a secret. Local `npm start` connects to the same origin without this variable.
-
-## How the Game Works
-
-The host configures and starts a game with at least two connected players. Each player draws once per round. At the start of a turn the server chooses the configured number of word options and sends them only to the current drawer. The drawer's chosen word stays on the server; other players receive blanks, then timed hint reveals unless hidden mode disables hints. Drawing and guesses are accepted only from players allowed to perform those actions.
-
-The server owns the round deadline and awards 100 base points plus up to 100 speed points for a correct guess. The drawer receives 50 points for each correct guess. Correct guesses score only once per player per turn. After the timer expires or all connected guessers solve the word, the answer is revealed and the next turn starts.
-
-Room/game state is held in memory, so active games end if the server restarts. The application is intended for small private game rooms rather than persistent accounts or durable leaderboards.
-
-## Socket.IO Architecture
-
-Clients join a Socket.IO room named by the room code. The server broadcasts sanitized room/player state and drawing point events to that room. Private drawer data is emitted directly to that player's socket. Stroke coordinates are normalized to the canvas dimensions so each client can render them at its own size; the server clamps coordinates, color, and brush width and checks the active drawer before relaying them.
-
-Main event groups include `create_room`, `join_room`, `join_public_room`, `resume_room`, `room_updated`, `kick_player`, `start_game`, `choose_word`, `game_state`, `round_started`, `timer_update`, `draw_start`, `draw_move`, `draw_end`, `clear_canvas`, `undo_drawing`, `guess`, `chat_message`, `correct_guess`, `round_ended`, and `game_over`.
+The browser tests use a separate server on port 3107, create independent desktop/mobile player sessions, verify ready-up, actual canvas pixels and drawing sync, reconnect restoration, guesses and scores, replay, touch drawing, all rounds, the winner and play-again. Screenshots are written to ignored `test-results/`.
 
 ## Deployment
 
-Live URL: https://web3task-drawing-game.onrender.com
+### Vercel Frontend
 
-The included `render.yaml` defines a Render web service with `npm install`, `npm start`, and `/health` checks. Push this project to a GitHub repository, create a Blueprint deployment in Render from that repository, and wait for the service URL. Set `ALLOWED_ORIGIN` to the public app origin, then open the deployed URL in multiple browser sessions to verify room creation, reconnection, drawing, and scoring. The in-memory room model supports a single server process; horizontal scaling requires a shared Socket.IO adapter and shared room/game state.
+Set Root Directory to `drawing-game` if the repository contains that subfolder, Framework Preset to `Other`, Install Command to `npm ci --include=dev`, Build Command to `npm run build`, and Output Directory to `dist`. `vercel.json` supplies these commands; remove conflicting dashboard overrides.
 
-### Vercel Frontend With Render Backend
+Set **GAME_SERVER_URL** for Production and Preview to `https://web3task-drawing-game.onrender.com`. Save it and redeploy. Vite embeds this public backend origin in the browser bundle and bundles `socket.io-client`; no server-served client library or CDN is required.
 
-1. Keep the Node server deployed on Render using `npm install` and `npm start`. Verify that its `/health` endpoint returns `ok: true`.
-2. In Vercel, set the project Root Directory to `drawing-game` (or the repository root if it already contains this package). Use Framework Preset `Other`, Build Command `npm run build`, and Output Directory `dist` as configured in `vercel.json`.
-3. Add `GAME_SERVER_URL` to Vercel's environment variables for Production and Preview, using your backend origin, for example `https://web3task-drawing-game.onrender.com`. Redeploy after changing it.
-4. If Render has `ALLOWED_ORIGIN` set, change it to your Vercel site origin, with no trailing slash. The default `*` also permits Vercel previews. Restart/redeploy the backend after changing its environment variables.
-5. Open the Vercel site in two browser sessions, create and join a new room, and start the game.
+### Render Backend
 
-The static build includes the Socket.IO browser library and generates `/js/config.js` with the backend origin. All three pages connect directly to that backend; the Vercel deployment only serves the frontend. Local development and the full-stack Render site still connect to their own origin.
+Set Root Directory to `drawing-game` if needed, Build Command to `npm ci --include=dev && npm run build`, and Start Command to `npm start`. Use Node 24 LTS. Set **ALLOWED_ORIGIN** to `https://web3task-drawing-game.vercel.app`, without a trailing slash. `/health` is the health-check endpoint. The included `render.yaml` defines the service commands.
 
-Vercel also supports WebSockets in Functions, but this game's in-memory rooms and timers assume one persistent server process. Moving the backend to Functions requires shared game state and coordination across instances, rather than only changing the deployment settings.
+`PORT` defaults to 3000; Render supplies its own port. `ALLOWED_ORIGIN` defaults to `*` for local use. Vercel previews require allowing their origins; the backend accepts a comma-separated list of allowed origins. `GAME_SERVER_URL` is optional for local/Render builds, where the browser connects to its own origin. It is required for Vercel builds.
+
+## Architecture
+
+```text
+React components -> Socket.IO events -> Express / gameManager
+       |                                      |
+       v                                      v
+HTML5 Canvas                         Room -> Game + Players
+       ^                                      |
+       +------ strokes, state, guesses --------+
+```
+
+- `client/src/main.tsx`: typed React home, lobby, settings, players, moderation, chat, results and replay controls. A single socket survives view changes; acknowledgement timeouts report failed requests.
+- `client/src/Canvas.tsx`: typed pointer capture, normalized points, touch input, canvas rendering and replay. Fixed aspect ratio keeps desktop/mobile drawings proportional.
+- `client/src/types.ts`: room, player, drawing, replay, session, acknowledgement and component contracts. Strict TypeScript checks run before every production build.
+- `client/index.html`: the single minimal browser entry that mounts React. Lobby and game are React views at `/lobby` and `/game`; Express and Vercel also resolve the old `.html` URLs to this entry.
+- `server/models.js`: `Player` owns player state and score resets; `Game` owns drawing state and timers; `Room` extends `Game` with participants, settings and moderation state.
+- `server/roomManager.js`: room codes, validation, capacity, spectators, settings, bans and safe public snapshots.
+- `server/gameManager.js`: turn order, word privacy, timer deadlines, hints, permission checks, guesses, drawing events, replay, readiness, moderation and reconnection.
+- `server/wordManager.js`: categorized English/Hindi pools, custom words and Unicode-aware exact matching.
+- `server/scoring.js`: 100 base points plus up to 100 speed points; drawer receives 50 points per correct guess. Every player can score once per turn.
+
+Word matching normalizes NFKC, trims spaces, collapses repeated whitespace and ignores case. Substrings/partial guesses are deliberately not accepted. Words are sent only to the drawer until the turn ends. Suggested event names in the assignment are examples; the application consistently uses its own event names.
+
+Rooms, reports, bans and replays live in memory and are lost when the backend restarts. Use one backend instance; multiple instances require shared game state and Socket.IO coordination. Anonymous room bans block the same session token or name, but are not account-level bans. Reports are host moderation notifications, not an external support inbox. Ready-up is required from every connected non-spectator before the host starts.
+
+## Manual Production Verification
+
+1. Open the Vercel site in separate browser sessions/devices. Create a private room and use Copy invite link to join from the second device.
+2. Ready both players and start. Choose a word, draw, undo/erase/clear, and confirm live updates on the other device.
+3. Guess correctly and confirm both guesser and drawer scores. Complete the rounds and check the final winner and Play again.
+4. Join as a spectator during play. Confirm canvas restoration after reload, blocked drawing/guessing, and last-round replay.
+5. Create rooms with Hindi/categories/hidden mode. Verify hints and word choices. Test report, kick/ban and majority votes with additional sessions.
+6. Test at 320px/390px portrait and phone landscape; check chat keyboard, touch drawing and control access.
 
 ## Screenshots
 
-Screenshots can be added here after capturing the home, lobby, and in-game views.
+![Desktop game](docs/screenshots/game-desktop.png)
+
+![Phone game](docs/screenshots/game-mobile.png)
+
+![Phone settings](docs/screenshots/home-small-phone.png)
+
+![Phone replay](docs/screenshots/replay-mobile.png)
